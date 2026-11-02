@@ -43,7 +43,7 @@ CURRICULUM = [
         "end": "2026-11-08",
         "days": {
             2: ("画出 HashMap 的 put 流程，手写 ArrayList",
-                [("装环境：JDK 17 + IDEA + Git + LeetCode 账号，跑通 Hello World", 2.0),
+                [("装 JDK 17 并配好 JAVA_HOME，IDEA 里选上它，跑通 Hello World（IDEA / LeetCode 账号已有，10 分钟）", 1.0),
                  ("建 GitHub 仓库 java-learning-log，README 写目标，推第一个 commit", 0.5),
                  ("读 ArrayList 源码：grow() 的 1.5 倍扩容、modCount、fail-fast", 1.5),
                  ("手写 MyArrayList：数组 + 自动扩容 + get/add/remove", 2.0),
