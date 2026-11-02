@@ -8,6 +8,23 @@ commit 曲线本身就是证据 —— 面试官点开 GitHub 看到的是"一�
 
 ---
 
+## 第一次使用（只做一次，5 分钟）
+
+```bash
+# 0. git 身份已经配好了（成俊祥 / 2081931330@qq.com），跳过也行；换电脑才需要：
+#    git config --global user.name "成俊祥"
+#    git config --global user.email "2081931330@qq.com"
+
+# 1. 在 GitHub 网页上新建仓库 java-learning-log（Public，不要勾选 README/.gitignore）
+# 2. 把本地仓库连上去并推第一次（把 <你的用户名> 换成 GitHub 用户名）
+git remote add origin https://github.com/<你的用户名>/java-learning-log.git
+git push -u origin master
+```
+
+> 推不上去通常是登录问题：第一次 push 会弹浏览器授权，登录后就有了凭据，之后 tick.py 就能自动推。
+
+---
+
 ## 怎么用（3 条命令）
 
 ```bash

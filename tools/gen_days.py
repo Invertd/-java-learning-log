@@ -555,6 +555,10 @@ def render_week(block):
 
 
 def main():
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
     force = "--force" in sys.argv
     DAYS_DIR.mkdir(exist_ok=True)
     WEEKS_DIR.mkdir(exist_ok=True)
