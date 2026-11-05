@@ -1,0 +1,76 @@
+# -*- coding: utf-8 -*-
+"""把 Java 八股卡片生成 Anki 可直接导入的 TSV。"""
+
+CARDS = [
+    ("HashMap 默认容量是多少？为什么必须是这个值？",
+     "<b>16，且必须是 2 的幂。</b><br><br>"
+     "因为算下标用 <code>(n-1) &amp; hash</code>，只有 n 是 2 的幂时，"
+     "它才等价于 <code>hash % n</code>，而位运算比取模快得多。<br><br>"
+     "<i>自测：能说出「为什么必须是 2 的幂」才算会。</i>"),
+
+    ("负载因子为什么是 0.75，不是 1 也不是 0.5？",
+     "<b>空间和时间的折中。</b><br><br>"
+     "太低（0.5）浪费一半空间；太高（1.0）桶快满，冲突激增，链表变长，查询退化。<br>"
+     "0.75 时，桶内元素达到 8 个的概率约为千万分之六，几乎不会树化。"),
+
+    ("hash 扰动 <code>h ^ (h &gt;&gt;&gt; 16)</code> 在干什么？",
+     "<b>把高 16 位挪下来和低 16 位异或。</b><br><br>"
+     "算下标只用了低位（<code>&amp; (n-1)</code>），高位从没参与过。"
+     "扰动后高位信息混进低位，减少冲突。"),
+
+    ("<code>(n-1) &amp; hash</code> 为什么能代替 <code>hash % n</code>？",
+     "<b>当 n 是 2 的幂时，n-1 的二进制是低位全 1</b>（16-1=15，即 1111）。<br><br>"
+     "与运算等于只保留 hash 的低位，效果和取模一样，但 CPU 快一个数量级。"),
+
+    ("putVal 有哪几个分支？按顺序说。",
+     "1. 桶为空 → new Node 直接放<br>"
+     "2. 桶首节点 key 相同 → 覆盖<br>"
+     "3. 是红黑树节点 → 走树插入<br>"
+     "4. 是链表 → 遍历找相同 key，找到就覆盖；到尾部就挂上去，再判断是否树化<br>"
+     "5. 插入完成 → size++，超过阈值就 resize()<br>"
+     "6. 如果是覆盖 → 返回旧值"),
+
+    ("put 一个已存在的 key 会怎样？怎么拿到旧值？",
+     "<b>旧值被覆盖</b>（一个 key 只能有一个 value），"
+     "但 <b>put 的返回值就是旧值</b>。<br><br>"
+     "不想覆盖用 <code>putIfAbsent</code>（对应源码里的 onlyIfAbsent 参数）。"),
+
+    ("数组和链表的区别？各自复杂度？",
+     "数组：内存<b>连续</b>，随机访问 O(1)，插入删除要搬元素 O(n)<br>"
+     "链表：内存<b>分散</b>，靠 next 指针串起来，访问要遍历 O(n)，插入删除 O(1)<br>"
+     "链表每个节点多一个指针的空间开销。"),
+
+    ("遍历链表时为什么不能写 <code>head = head.next</code>？",
+     "<b>因为 head 是唯一的入口。</b><br><br>"
+     "改了它，前面的节点就再也找不到了，整条链「断头」。<br>"
+     "正确做法：<code>Node p = head;</code> 用 p 走，head 不动。"),
+
+    ("什么是 fail-fast？靠什么实现？",
+     "集合在遍历中被结构性修改（add/remove）时立刻抛 "
+     "<code>ConcurrentModificationException</code>。<br><br>"
+     "靠 <b>modCount</b>：每次结构性修改 modCount++；迭代器创建时记下 expectedModCount，"
+     "每次 next() 比较，不等就抛。<br><br>"
+     "<b>注意</b>：它不是并发安全的，只是「尽早失败」。"),
+
+    ("链表什么时候变红黑树？为什么需要两个条件？",
+     "链表长度 ≥ <b>8</b>，<b>且</b> 数组容量 ≥ <b>64</b>（MIN_TREEIFY_CAPACITY）。<br><br>"
+     "容量不到 64 时，桶里元素多是因为数组太小，不是冲突多，"
+     "此时应该优先 resize() 扩容，而不是树化。"),
+]
+
+HEADER = [
+    "#separator:tab",
+    "#html:true",
+    "#deck:Java 八股",
+    "#notetype:Basic",
+    "#tags:Java HashMap",
+]
+
+lines = list(HEADER)
+for q, a in CARDS:
+    lines.append(q + "\t" + a)
+
+with open("java-八股卡片.txt", "w", encoding="utf-8", newline="\n") as f:
+    f.write("\n".join(lines) + "\n")
+
+print("写出 %d 张卡 -> java-八股卡片.txt" % len(CARDS))
