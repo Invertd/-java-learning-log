@@ -85,5 +85,6 @@ class LinkedList {
             System.out.print(head.value + " ");
             head = head.next;
         }
+        Map<Integer,Integer> map = new HashMap<>();
     }
 }

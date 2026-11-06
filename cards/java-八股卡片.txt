@@ -13,3 +13,11 @@ put 一个已存在的 key 会怎样？怎么拿到旧值？	<b>旧值被覆盖<
 遍历链表时为什么不能写 <code>head = head.next</code>？	<b>因为 head 是唯一的入口。</b><br><br>改了它，前面的节点就再也找不到了，整条链「断头」。<br>正确做法：<code>Node p = head;</code> 用 p 走，head 不动。
 什么是 fail-fast？靠什么实现？	集合在遍历中被结构性修改（add/remove）时立刻抛 <code>ConcurrentModificationException</code>。<br><br>靠 <b>modCount</b>：每次结构性修改 modCount++；迭代器创建时记下 expectedModCount，每次 next() 比较，不等就抛。<br><br><b>注意</b>：它不是并发安全的，只是「尽早失败」。
 链表什么时候变红黑树？为什么需要两个条件？	链表长度 ≥ <b>8</b>，<b>且</b> 数组容量 ≥ <b>64</b>（MIN_TREEIFY_CAPACITY）。<br><br>容量不到 64 时，桶里元素多是因为数组太小，不是冲突多，此时应该优先 resize() 扩容，而不是树化。
+remove 一个 key 时，被删节点在桶内可能有哪几种位置？分别改哪个引用？	三种：<br>1. <b>桶是空的</b> → 不用删，直接返回 null<br>2. <b>节点是桶首</b> → 改 <code>table[i] = node.next</code><br>3. <b>中间或尾部</b> → 改 <code>prev.next = node.next</code>（尾部时 node.next 恰好是 null，不用特判）<br><br><i>自测：头节点改的是 table[i]，不是某个节点的 next。</i>
+单链表删除节点，为什么手里必须有前驱 prev？为什么初始化为 null？	单链表<b>不可逆向</b>，拿不到前驱就改不了指向它的那条 next。<br><br>prev 初值给 null 是当<b>哨兵</b>：null 表示「当前节点没有前驱」= 它是桶首。这样 <code>if (prev == null)</code> 一个判断就把「改 table[i]」和「改 prev.next」分开。
+HashMap 删除元素后为什么不缩容？	1. 扩容条件是 size &gt; threshold，一缩容 threshold 就降，同一批元素立刻又超阈值 → <b>反复抖动</b><br>2. 缩容要 <b>rehash 全部元素</b>，代价大，收益只是省点内存<br>3. 设计上<b>容量只增不减</b>（上限 1&lt;&lt;30），从根上排除抖动
+JDK 8 的 removeNode 遇到红黑树桶怎么处理？什么时候退化成链表？	桶首是 TreeNode 时走 <code>removeTreeNode</code>；删完若树已经很小（root 为 null 或左右子树缺得厉害）就 <b>untreeify</b> 拆回链表。<br><br>对比记：树化要<b>链表 ≥ 8 且容量 ≥ 64</b>；退化看的是<b>树的形态太小</b>。
+remove 一个不存在的 key，size 要不要变？返回值是什么？	<b>size 不变</b>。删到了才 size-- 并返回旧 value；没删到返回 null，什么也不动。<br><br>别用返回值判断「删没删到」—— value 本身可能就是 null。要判断用 <code>remove(key, value)</code> 的布尔重载。
+节点从链表上摘下来之后，要不要手动把它的 next 置 null？	<b>不需要</b>，没人引用它了，GC 会回收。<br><br>反着写错更危险：<code>prev.next = null</code> 会把被删节点后面的<b>整条链丢掉</b>。真正要手动置 null 的是「对象仍被引用但内部引用不再需要」，如 <code>ArrayList.clear()</code>，那是防内存泄漏。
+手写链表删除时最容易犯的两个错？	1. <b>循环条件漏取反</b>：<code>while (cur != null &amp;&amp; !keyEquals(key, cur.key))</code>，少个 ! 就一次都不进循环，直接掉进「删头节点」分支，<b>无条件删掉桶首</b><br>2. <b>把 prev 当成当前节点</b>：prev 和 cur 指同一个节点后，语义就乱了<br><br><i>自测：能说出「少一个 ! 会导致无条件删头节点」。</i>
+面试追问：remove 时偷懒只把 value 置 null 行不行？	不行，四个理由：<br>1. key 还在链表里，<b>size 不变</b>，遍历统计全错<br>2. Node.key 是 final，这个位置<b>复用不了</b><br>3. 扩容时「已删」节点<b>还会被搬到新表</b><br>4. get 返回 null 但 containsKey 返回 true，<b>语义矛盾</b>

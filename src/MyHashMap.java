@@ -7,7 +7,7 @@
  *   - putVal()        第 623-664 行
  *   - resize()        第 675-757 行
  *
- * 一共 6 个 TODO。按顺序写，写完一个跑一次测试。
+ * 一共 7 个 TODO。按顺序写，写完一个跑一次测试。
  */
 public class MyHashMap<K, V> {
 
@@ -122,6 +122,36 @@ public class MyHashMap<K, V> {
             }
         }
         return null;
+    }
+
+    public V remove(Object key) {
+        // TODO 7: 删掉一个 key，返回它原来的 value；key 不存在就返回 null
+        //
+        // 动手前先自己回答三个问题（答不上来就别写代码）：
+        //   ① 要删的节点可能在哪三个位置？三个位置分别要改哪个引用？
+        //   ② 单链表不可逆向，删一个节点你手里必须同时有什么？
+        //   ③ 删完要不要缩容？（想清楚 JDK 为什么不缩）
+        //
+        // 卡住超过 20 分钟再看 JDK 的 removeNode()，然后合上重写。
+        //throw new UnsupportedOperationException("TODO 7: remove() 还没写");
+        int h = hash(key);
+        int i = indexOf(h);
+        Node<K, V> cur = table[i];
+        Node<K, V> pre = null;
+        while(cur != null && !keyEquals(key, cur.key)) {
+            pre = cur;
+            cur = cur.next;
+        }
+        if (cur == null) {
+            return null;
+        }
+        if (pre != null) {
+            pre.next = cur.next;
+        }else{
+            table[i] = cur.next;
+        }
+        size--;
+        return cur.value;
     }
 
     @SuppressWarnings("unchecked")

@@ -115,6 +115,65 @@ public class MyHashMapTest {
             eq("toString", "{x=1}", m.toString());
         });
 
+        section("8. remove 的基本契约", () -> {
+            MyHashMap<String, Integer> m = new MyHashMap<>();
+            m.put("a", 1);
+            eq("remove 返回旧值", 1, m.remove("a"));
+            eq("remove 之后 get", null, m.get("a"));
+            eq("remove 之后 size", 0, m.size());
+
+            eq("remove 不存在的 key", null, m.remove("zzz"));
+            eq("此时 size 不变", 0, m.size());
+
+            eq("重复 remove 同一个 key", null, m.remove("a"));
+
+            MyHashMap<String, String> m2 = new MyHashMap<>();
+            m2.put(null, "nullValue");
+            eq("remove(null) 返回旧值", "nullValue", m2.remove(null));
+            eq("remove(null) 之后 get(null)", null, m2.get(null));
+            eq("remove(null) 之后 size", 0, m2.size());
+        });
+
+        section("9. remove 覆盖链表的 头 / 中 / 尾", () -> {
+            // 1、17、33 在容量 16 时都落在下标 1
+            MyHashMap<Integer, Integer> m = new MyHashMap<>();
+            m.put(1, 10);
+            m.put(17, 170);
+            m.put(33, 330);
+            ok("删除前 桶 1 链表长度 = 3", m.bucketLength(1) == 3);
+
+            eq("删中间 17", 170, m.remove(17));
+            eq("get(17) 没了", null, m.get(17));
+            ok("删中间后 桶 1 长度 = 2", m.bucketLength(1) == 2);
+            eq("get(1) 还在", 10, m.get(1));
+            eq("get(33) 还在", 330, m.get(33));
+
+            eq("删头 1", 10, m.remove(1));
+            ok("删头后 桶 1 长度 = 1", m.bucketLength(1) == 1);
+            eq("get(33) 还在", 330, m.get(33));
+
+            eq("删尾 33", 330, m.remove(33));
+            ok("桶 1 已清空", m.bucketLength(1) == 0);
+            eq("size", 0, m.size());
+        });
+
+        section("10. remove 之后这张表还能不能用", () -> {
+            MyHashMap<String, Integer> m = new MyHashMap<>();
+            m.put("a", 1);
+            m.put("b", 2);
+            m.remove("a");
+            eq("删掉的 key 可以重新 put", null, m.put("a", 100));
+            eq("重新 put 之后 get", 100, m.get("a"));
+            eq("size", 2, m.size());
+
+            m.remove("a");
+            m.remove("b");
+            eq("全删光后 toString", "{}", m.toString());
+            eq("全删光后 size", 0, m.size());
+            eq("删光后 capacity 不缩", 16, m.capacity());
+            eq("删光后 threshold 不变", 12, m.threshold);
+        });
+
         System.out.println("\n----------------------------------------");
         System.out.println("通过 " + passed + " 项，失败 " + failed + " 项");
         if (failed == 0 && passed > 0) {
