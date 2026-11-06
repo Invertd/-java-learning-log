@@ -17,9 +17,22 @@ import java.util.Arrays;
  *   Q3 每一步移动哪一边？依据是哪两根柱子的比较？
  *
  * 你的答案：
- *   Q1:
- *   Q2:
- *   Q3:
+ *   Q1:height[left] * (right - left)，底和高
+ *   Q2:左指针等于右指针的时候，这时面积为0
+ *   Q3:短的一边，左右指针指向的两个柱子
+ *
+ * 标准答案（2026-11-06 晚补）：
+ *   Q1：面积 = min(height[left], height[right]) × (right - left)。
+ *       宽 = 两个下标的差；高 = 两根柱子中【较矮】的那根 —— 水会从矮的一侧溢出，
+ *       所以高永远由短板决定，既不是较高那根，也不是两者的平均值。
+ *   Q2：while (left < right)，left 与 right 相邻就停。
+ *       left == right 时只剩一根柱子，宽度 = 0，面积必然 = 0，没有计算价值。
+ *   Q3：移动【较矮】的那一边（两边相等时移哪边都行，但要固定写一边）。
+ *       面试必背理由：设 height[left] <= height[right]，此刻面积 = height[left] × (right-left)。
+ *       把 left 钉死不动，right 无论往左移到哪个位置，高度都不可能超过 height[left]
+ *       （因为 height[left] 本身就是短板），而宽度只会越来越小
+ *       → 所有「以当前 left 为左端点」的组合，面积都 ≤ 现在这个值，全都不可能更优。
+ *       所以 left 这个位置可以【永久淘汰】，放心 left++。反过来去移动高边，这个论证就不成立。
  */
 public class L11MaxArea {
 
